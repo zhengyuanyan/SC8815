@@ -18,16 +18,20 @@
 // =============================================================================
 
 SC8815::SC8815(TwoWire &wire, uint8_t addr)
-    : _wire(&wire), _addr(addr), _vbusRshunt(10), _battRshunt(10), _fbRup(100.0), _fbRdown(10.0) {}
+    : _wire(&wire), _addr(addr), _vbusRshunt(10), _battRshunt(10), _vbus_fbRup(100.0), _vbus_fbRdown(10.0), _adin_fbRup(100.0), _adin_fbRdown(10.0) {}
 
 // 初始化: 记录采样电阻与 FB 分压参数, 并探测芯片 I2C 应答
 // 注意: 调用前需先完成 Wire.begin() 与引脚映射
-bool SC8815::begin(uint16_t vbusRshunt_mOhm, uint16_t battRshunt_mOhm, double fbRup, double fbRdown)
+bool SC8815::begin(uint16_t vbusRshunt_mOhm, uint16_t battRshunt_mOhm, double vbus_fbRup, double vbus_fbRdown, double adin_fbRup, double adin_fbRdown)
 {
     _vbusRshunt = vbusRshunt_mOhm;
     _battRshunt = battRshunt_mOhm;
-    _fbRup = fbRup;
-    _fbRdown = fbRdown;
+
+    _vbus_fbRup = vbus_fbRup;
+    _vbus_fbRdown = vbus_fbRdown;
+
+    _adin_fbRup = adin_fbRup;
+    _adin_fbRdown = adin_fbRdown;
 
     // SC8815 无芯片 ID 寄存器 (手册未定义), 仅通过 I2C 从机地址应答探测
     _wire->beginTransmission(_addr);
@@ -145,11 +149,24 @@ void SC8815::readInterruptStatus(InterruptStatus &status)
 // 手册公式: VBUS = (4×VBUS_FB_VALUE + VBUS_FB_VALUE2 + 1) × VBUS_RATIO × 2mV
 uint16_t SC8815::readVbusVoltage()
 {
-    // RATIO[0]: VBUS 监测比例 (5x / 12.5x)
-    double ratio = ((readRegister(SCREG_RATIO) & 0x01) == 1) ? 5.0 : 12.5;
-    uint8_t tmp1 = readRegister(SCREG_VBUS_FB_VALUE);       // 高 8 位
-    uint8_t tmp2 = readRegister(SCREG_VBUS_FB_VALUE2) >> 6; // 低 2 位
-    // 先做整数乘法再乘比例, 保证 12.5x 时结果精确 (N×2×ratio 必为整数)
+    uint16_t tmp1, tmp2;
+    double ratio;
+
+    if (readRegister(SCREG_CTRL1_SET) & 0x10)
+    {
+        // 外部 FB 模式: 读取 0x03 / 0x04, 结合外部分压比
+        tmp1 = readRegister(SCREG_VBUSREF_E_SET);
+        tmp2 = readRegister(SCREG_VBUSREF_E_SET2) >> 6;
+        ratio = (_vbus_fbRup / _vbus_fbRdown) + 1.0;
+        // Serial.printf("[VBUS] 外部分压比: %.2f \n", ratio);
+    }
+    else
+    {
+        // 内部 FB 模式: 读取 0x01 / 0x02, 结合 VBUS_RATIO
+        tmp1 = readRegister(SCREG_VBUSREF_I_SET);
+        tmp2 = readRegister(SCREG_VBUSREF_I_SET2) >> 6;
+        ratio = ((readRegister(SCREG_RATIO) & 0x01) == 1) ? 5.0 : 12.5;
+    }
     return (uint16_t)((4 * tmp1 + tmp2 + 1) * 2 * ratio);
 }
 
@@ -170,10 +187,22 @@ uint16_t SC8815::readVbusCurrent()
 // 手册公式: VBAT = (4×VBAT_FB_VALUE + VBAT_FB_VALUE2 + 1) × VBAT_MON_RATIO × 2mV
 uint16_t SC8815::readBattVoltage()
 {
-    // RATIO[1]: VBAT 监测比例 (12.5x / 5x)
-    double ratio = ((readRegister(SCREG_RATIO) & 0x02) == 0x02) ? 5.0 : 12.5;
-    uint8_t tmp1 = readRegister(SCREG_VBAT_FB_VALUE);
-    uint8_t tmp2 = readRegister(SCREG_VBAT_FB_VALUE2) >> 6;
+    uint16_t tmp1, tmp2;
+    double ratio;
+
+    if (readRegister(SCREG_VBAT_SET) & 0x20) // VBAT_SET[5] 电池电压设定方式选择
+    {
+    }
+    else
+    {
+        tmp1 = readRegister(SCREG_VBAT_FB_VALUE);
+        tmp2 = readRegister(SCREG_VBAT_FB_VALUE2) >> 6;
+        // RATIO[1]: VBAT 监测比例 (12.5x / 5x)
+        ratio = ((readRegister(SCREG_RATIO) & 0x02) == 0x02) ? 5.0 : 12.5;
+
+        // ratio = ratio * 2.0; // 转换为 mV
+    }
+
     return (uint16_t)((4 * tmp1 + tmp2 + 1) * 2 * ratio);
 }
 
@@ -193,9 +222,15 @@ uint16_t SC8815::readBattCurrent()
 // 手册公式: VADIN = (4×ADIN_VALUE + ADIN_VALUE2 + 1) × 2mV
 uint16_t SC8815::readAdinVoltage()
 {
-    uint8_t tmp1 = readRegister(SCREG_ADIN_VALUE);
-    uint8_t tmp2 = readRegister(SCREG_ADIN_VALUE2) >> 6;
-    return (uint16_t)((4 * tmp1 + tmp2 + 1) * 2);
+    uint16_t tmp1, tmp2;
+    double ratio;
+
+    tmp1 = readRegister(SCREG_ADIN_VALUE);
+    tmp2 = readRegister(SCREG_ADIN_VALUE2) >> 6;
+
+    ratio = (_adin_fbRup / _adin_fbRdown) + 1.0;
+
+    return (uint16_t)((4 * tmp1 + tmp2 + 1) * 2 * ratio);
 }
 
 // =============================================================================
@@ -220,9 +255,9 @@ void SC8815::setOutputVoltage(uint16_t newVolt_mV)
     bool external = (readRegister(SCREG_CTRL1_SET) & 0x10) != 0; // CTRL1[4] FB_SEL
 
     if (external)
-        ratio = (_fbRup / _fbRdown) + 1.0;                                 // 外部分压比
+        ratio = (_vbus_fbRup / _vbus_fbRdown) + 1.0; // 外部分压比
     else
-        ratio = ((readRegister(SCREG_RATIO) & 0x01) == 1) ? 5.0 : 12.5;    // 内部 RATIO[0]
+        ratio = ((readRegister(SCREG_RATIO) & 0x01) == 1) ? 5.0 : 12.5; // 内部 RATIO[0]
 
     // 计算 10-bit 参考码 (四舍五入), 并钳位到 [1, 1024]
     uint32_t code = (uint32_t)((newVolt_mV / ratio) / 2.0 + 0.5);
@@ -321,7 +356,7 @@ uint16_t SC8815::getOutputVoltage()
         // 外部 FB 模式: 读取 0x03 / 0x04, 结合外部分压比
         tmp1 = readRegister(SCREG_VBUSREF_E_SET);
         tmp2 = readRegister(SCREG_VBUSREF_E_SET2) >> 6;
-        ratio = (_fbRup / _fbRdown) + 1.0;
+        ratio = (_vbus_fbRup / _vbus_fbRdown) + 1.0;
     }
     else
     {
@@ -365,7 +400,7 @@ uint16_t SC8815::getVinregVoltage()
 uint16_t SC8815::getMaxOutputVoltage()
 {
     double ratio = (readRegister(SCREG_CTRL1_SET) & 0x10)
-                       ? ((_fbRup / _fbRdown) + 1.0)
+                       ? ((_vbus_fbRup / _vbus_fbRdown) + 1.0)
                        : (((readRegister(SCREG_RATIO) & 0x01) == 1) ? 5.0 : 12.5);
     return (uint16_t)(2048 * ratio);
 }
@@ -375,7 +410,7 @@ uint16_t SC8815::getMaxOutputVoltage()
 uint16_t SC8815::getOutputVoltageStep()
 {
     double ratio = (readRegister(SCREG_CTRL1_SET) & 0x10)
-                       ? ((_fbRup / _fbRdown) + 1.0)
+                       ? ((_vbus_fbRup / _vbus_fbRdown) + 1.0)
                        : (((readRegister(SCREG_RATIO) & 0x01) == 1) ? 5.0 : 12.5);
     return (uint16_t)(2 * ratio);
 }

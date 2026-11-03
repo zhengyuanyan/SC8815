@@ -24,31 +24,31 @@
 // 标注 [PSTOP] 的配置项, 手册要求 "Set this bit during PSTOP pin is high",
 // 即需在 PSTOP 拉高(待机)期间写入, 运行中动态修改可能不生效。
 // =============================================================================
-#define SCREG_VBAT_SET 0x00        // [PSTOP] 电池配置: IRCOMP / VBAT_SEL / CSEL / VCELL_SET
-#define SCREG_VBUSREF_I_SET 0x01   // 内部FB模式 VBUS 参考电压设定 (高 8 位)
-#define SCREG_VBUSREF_I_SET2 0x02  // 内部FB模式 VBUS 参考电压设定 (低 2 位, 位于 bit7:6)
-#define SCREG_VBUSREF_E_SET 0x03   // 外部FB模式 VBUS 参考电压设定 (高 8 位)
-#define SCREG_VBUSREF_E_SET2 0x04  // 外部FB模式 VBUS 参考电压设定 (低 2 位, 位于 bit7:6)
-#define SCREG_IBUS_LIM_SET 0x05    // IBUS 限流门限 (充电/放电模式均有效)
-#define SCREG_IBAT_LIM_SET 0x06    // IBAT 限流门限 (充电/放电模式均有效)
-#define SCREG_VINREG_SET 0x07      // VINREG 动态输入电压门限 (充电模式)
-#define SCREG_RATIO 0x08           // [PSTOP] 采样/监测比例: IBAT_RATIO / IBUS_RATIO / VBAT_MON_RATIO / VBUS_RATIO
-#define SCREG_CTRL0_SET 0x09       // EN_OTG / VINREG_RATIO / FREQ_SET / DT_SET
-#define SCREG_CTRL1_SET 0x0A       // ICHAR_SEL / DIS_TRICKLE / DIS_TERM / FB_SEL / TRICKLE_SET / DIS_OVP
-#define SCREG_CTRL2_SET 0x0B       // FACTORY / EN_DITHER / SLEW_SET
-#define SCREG_CTRL3_SET 0x0C       // EN_PGATE / GPO_CTRL / AD_START / ILIM_BW / LOOP / SFB / EOC / PFM
-#define SCREG_VBUS_FB_VALUE 0x0D   // R: ADC 回读 VBUS 电压高 8 位
-#define SCREG_VBUS_FB_VALUE2 0x0E  // R: ADC 回读 VBUS 电压低 2 位 (位于 bit7:6)
-#define SCREG_VBAT_FB_VALUE 0x0F   // R: ADC 回读 VBAT 电压高 8 位
-#define SCREG_VBAT_FB_VALUE2 0x10  // R: ADC 回读 VBAT 电压低 2 位 (位于 bit7:6)
-#define SCREG_IBUS_VALUE 0x11      // R: ADC 回读 IBUS 电流高 8 位
-#define SCREG_IBUS_VALUE2 0x12     // R: ADC 回读 IBUS 电流低 2 位 (位于 bit7:6)
-#define SCREG_IBAT_VALUE 0x13      // R: ADC 回读 IBAT 电流高 8 位
-#define SCREG_IBAT_VALUE2 0x14     // R: ADC 回读 IBAT 电流低 2 位 (位于 bit7:6)
-#define SCREG_ADIN_VALUE 0x15      // R: ADC 回读 ADIN 引脚电压高 8 位
-#define SCREG_ADIN_VALUE2 0x16     // R: ADC 回读 ADIN 引脚电压低 2 位 (位于 bit7:6)
-#define SCREG_STATUS 0x17          // R: 实时状态: AC_OK / INDET / VBUS_SHORT / OTP / EOC
-#define SCREG_MASK 0x19            // R/W: 中断屏蔽: 对应位置 1 屏蔽 INT 引脚输出
+#define SCREG_VBAT_SET 0x00       // [PSTOP] 电池配置: IRCOMP / VBAT_SEL / CSEL / VCELL_SET
+#define SCREG_VBUSREF_I_SET 0x01  // 内部FB模式 VBUS 参考电压设定 (高 8 位)
+#define SCREG_VBUSREF_I_SET2 0x02 // 内部FB模式 VBUS 参考电压设定 (低 2 位, 位于 bit7:6)
+#define SCREG_VBUSREF_E_SET 0x03  // 外部FB模式 VBUS 参考电压设定 (高 8 位)
+#define SCREG_VBUSREF_E_SET2 0x04 // 外部FB模式 VBUS 参考电压设定 (低 2 位, 位于 bit7:6)
+#define SCREG_IBUS_LIM_SET 0x05   // IBUS 限流门限 (充电/放电模式均有效)
+#define SCREG_IBAT_LIM_SET 0x06   // IBAT 限流门限 (充电/放电模式均有效)
+#define SCREG_VINREG_SET 0x07     // VINREG 动态输入电压门限 (充电模式)
+#define SCREG_RATIO 0x08          // [PSTOP] 采样/监测比例: IBAT_RATIO / IBUS_RATIO / VBAT_MON_RATIO / VBUS_RATIO
+#define SCREG_CTRL0_SET 0x09      // EN_OTG / VINREG_RATIO / FREQ_SET / DT_SET
+#define SCREG_CTRL1_SET 0x0A      // ICHAR_SEL / DIS_TRICKLE / DIS_TERM / FB_SEL / TRICKLE_SET / DIS_OVP
+#define SCREG_CTRL2_SET 0x0B      // FACTORY / EN_DITHER / SLEW_SET
+#define SCREG_CTRL3_SET 0x0C      // EN_PGATE / GPO_CTRL / AD_START / ILIM_BW / LOOP / SFB / EOC / PFM
+#define SCREG_VBUS_FB_VALUE 0x0D  // R: ADC 回读 VBUS 电压高 8 位
+#define SCREG_VBUS_FB_VALUE2 0x0E // R: ADC 回读 VBUS 电压低 2 位 (位于 bit7:6)
+#define SCREG_VBAT_FB_VALUE 0x0F  // R: ADC 回读 VBAT 电压高 8 位
+#define SCREG_VBAT_FB_VALUE2 0x10 // R: ADC 回读 VBAT 电压低 2 位 (位于 bit7:6)
+#define SCREG_IBUS_VALUE 0x11     // R: ADC 回读 IBUS 电流高 8 位
+#define SCREG_IBUS_VALUE2 0x12    // R: ADC 回读 IBUS 电流低 2 位 (位于 bit7:6)
+#define SCREG_IBAT_VALUE 0x13     // R: ADC 回读 IBAT 电流高 8 位
+#define SCREG_IBAT_VALUE2 0x14    // R: ADC 回读 IBAT 电流低 2 位 (位于 bit7:6)
+#define SCREG_ADIN_VALUE 0x15     // R: ADC 回读 ADIN 引脚电压高 8 位
+#define SCREG_ADIN_VALUE2 0x16    // R: ADC 回读 ADIN 引脚电压低 2 位 (位于 bit7:6)
+#define SCREG_STATUS 0x17         // R: 实时状态: AC_OK / INDET / VBUS_SHORT / OTP / EOC
+#define SCREG_MASK 0x19           // R/W: 中断屏蔽: 对应位置 1 屏蔽 INT 引脚输出
 
 // =============================================================================
 // 枚举配置选项定义 (位域布局与手册寄存器表完全一致)
@@ -208,8 +208,8 @@ enum SCHWI_TRICKLE_SET
 // 0x0A CTRL1[2] 放电模式过压保护 (VBUS 超过目标值 10% 时停止开关)
 enum SCHWI_OVP
 {
-    SCHWI_OVP_Enable = 0x00,  // 0: 使能 OVP (复位默认)
-    SCHWI_OVP_Disable = 0x04  // 1: 关闭 OVP
+    SCHWI_OVP_Enable = 0x00, // 0: 使能 OVP (复位默认)
+    SCHWI_OVP_Disable = 0x04 // 1: 关闭 OVP
 };
 
 // 0x0B CTRL2[2] 开关频率抖动使能 [PSTOP]
@@ -348,10 +348,12 @@ public:
      * @param battRshunt_mOhm VBAT 侧采样电阻 RS2 阻值 (mΩ, 手册推荐 5/10mΩ)
      * @param fbRup 外部 FB 分压上拉电阻 (kΩ)
      * @param fbRdown 外部 FB 分压下拉电阻 (kΩ)
+     * @param vbat_fbRup 外部 VBAT 分压上拉电阻 (kΩ)
+     * @param vbat_fbRdown 外部 VBAT 分压下拉电阻 (kΩ)
      * @return true: 芯片应答正常; false: 芯片无应答 (请检查连线与地址)
      * @note SC8815 无 ID 寄存器, 仅通过 I2C 应答探测; 调用前需先执行 Wire.begin()
      */
-    bool begin(uint16_t vbusRshunt_mOhm = 10, uint16_t battRshunt_mOhm = 10, double fbRup = 100.0, double fbRdown = 10.0);
+    bool begin(uint16_t vbusRshunt_mOhm = 10, uint16_t battRshunt_mOhm = 10, double vbus_fbRup = 100.0, double vbus_fbRdown = 10.0, double vbat_fbRup = 100.0, double vbat_fbRdown = 10.0);
 
     // 配置电池参数 (0x00 VBAT_SET), 需在 PSTOP 拉高(待机)期间调用
     void configBattery(const BatteryConfig &config);
@@ -418,8 +420,11 @@ private:
     uint8_t _addr;
     uint16_t _vbusRshunt; // VBUS 端采样电阻 RS1 阻值 (mΩ)
     uint16_t _battRshunt; // VBAT 端采样电阻 RS2 阻值 (mΩ)
-    double _fbRup;        // 外部 FB 分压上拉电阻 (kΩ)
-    double _fbRdown;      // 外部 FB 分压下拉电阻 (kΩ)
+    double _vbus_fbRup;    // 外部VBUS FB 分压上拉电阻 (kΩ)
+    double _vbus_fbRdown;  // 外部VBUS FB 分压下拉电阻 (kΩ)
+
+    double _adin_fbRup;   // 外部 ADIN FB 分压上拉电阻 (kΩ)
+    double _adin_fbRdown; // 外部 ADIN FB 分压下拉电阻 (kΩ)
 
     bool writeRegister(uint8_t reg, uint8_t data);
     uint8_t readRegister(uint8_t reg);
